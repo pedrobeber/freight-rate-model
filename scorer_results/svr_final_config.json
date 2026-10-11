@@ -1,0 +1,11 @@
+{
+ "kernel": "rbf",
+ "C": 45.4862082634092,
+ "gamma": 0.03125996297001373,
+ "eps_sd": 0.19872959276495822,
+ "degree": null,
+ "coef0": null,
+ "target": "sqrt_rpm",
+ "features": "lean",
+ "scaler": "robust"
+}

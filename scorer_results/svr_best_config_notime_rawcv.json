@@ -1,0 +1,11 @@
+{
+ "kernel": "poly",
+ "C": 5.804846082000386,
+ "gamma": 0.40204368282196157,
+ "eps_sd": 0.2817552330747256,
+ "degree": 3,
+ "coef0": 0.0,
+ "target": "log_rate",
+ "features": "rich",
+ "scaler": "minmax"
+}
