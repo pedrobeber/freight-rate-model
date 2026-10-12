@@ -1,13 +1,11 @@
 """Fit the final SVR on all labeled clean rows and write the submission files.
 
-The configuration is read from scorer_results/svr_final_config.json. It is the dev-CV winner of
-`python src/tune_svr.py 200 notime_dm`.
+The model settings are in src/config.py.
 
 Outputs (in predictions/):
     validation_predictions.csv   predicted rate for the 12,000 loads to predict
     december-chart-inputs.csv    the fixed December load with its predicted rate
 """
-import json
 import warnings
 
 import numpy as np
@@ -34,11 +32,11 @@ def city_coordinates(train):
     return coordinates
 
 
-def check_on_test_months(model_config, clean, daily):
+def check_on_test_months(clean, daily):
     """Fit on Jan-Aug and score the held-out Sep-Oct months, as a last sanity check."""
     dev = clean[clean.date < config.TEST_START]
     test = clean[clean.date >= config.TEST_START]
-    model = SVRRateModel(model_config).fit(dev, daily)
+    model = SVRRateModel().fit(dev, daily)
     scores = metrics(test.posted_rate.values, model.predict(test))
     print("Sep-Oct check (fit on Jan-Aug):", {k: round(float(v), 3) for k, v in scores.items()})
 
@@ -76,8 +74,7 @@ def write_december_predictions(model, train):
 
 def main():
     config.PREDICTIONS_DIR.mkdir(exist_ok=True)
-    model_config = json.load(open(config.FINAL_CONFIG_FILE))
-    print("config:", model_config)
+    print("settings:", config.SVR_SETTINGS)
 
     train = F.load(config.TRAIN_FILE)
     valid = F.load(config.VALIDATION_FILE)
@@ -87,9 +84,9 @@ def main():
     print("outliers removed:", int(is_outlier.sum()), "of", len(train))
     clean = train[~is_outlier]
 
-    check_on_test_months(model_config, clean, daily)
+    check_on_test_months(clean, daily)
 
-    model = SVRRateModel(model_config).fit(clean, daily)
+    model = SVRRateModel().fit(clean, daily)
     print("final model fitted on", len(clean), "rows")
 
     validation = write_validation_predictions(model, valid)

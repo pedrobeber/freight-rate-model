@@ -21,13 +21,8 @@ OUTLIER_LOG_THRESHOLD = 0.5
 
 EARTH_DIAMETER_MILES = 7918
 
-RICH_COLS = [
-    "log_weight", "weight_sq", "sqrt_dist", "dist_sq", "haversine",
-    "eq_DryVan_x_logdist", "eq_Reefer_x_logdist", "eq_Flatbed_x_logdist",
-]
-TIME_EXTRA = ["log_mi7", "dow_sin", "dow_cos"]
-EXTRA_COLS = RICH_COLS + TIME_EXTRA
-LEAN_COLS = [
+# Inputs of the final model.
+MODEL_COLS = [
     "distance", "log_dist", "weight", "eq_DryVan", "eq_Reefer", "eq_Flatbed",
     "pickup_lat", "pickup_lon", "delivery_lat", "delivery_lon", "circuity",
 ]
@@ -103,37 +98,9 @@ def build(df, daily, weight_median):
     return X
 
 
-def add_extras(X):
-    """Nonlinear transforms and interactions on top of build()."""
-    X = X.copy()
-    X["log_weight"] = np.log(X.weight.clip(lower=1))
-    X["weight_sq"] = (X.weight / 1e4) ** 2
-    X["sqrt_dist"] = np.sqrt(X.distance)
-    X["dist_sq"] = (X.distance / 1e3) ** 2
-    X["haversine"] = haversine(X.pickup_lat, X.pickup_lon, X.delivery_lat, X.delivery_lon)
-    for equipment in EQUIP:
-        column = equipment_column(equipment)
-        X[column + "_x_logdist"] = X[column] * X.log_dist
-    X["log_mi7"] = np.log(X.mi_day_7)
-    X["dow_sin"] = np.sin(2 * np.pi * X.dow / 7)
-    X["dow_cos"] = np.cos(2 * np.pi * X.dow / 7)
-    return X
-
-
-def feature_set(X, name):
-    """Select the columns of one named feature set from an add_extras() table."""
-    base = [c for c in X.columns if c not in TIME_COLS and c not in EXTRA_COLS]
-    if name == "base":
-        return X[base]
-    if name == "lean":
-        return X[LEAN_COLS]
-    if name == "rich":
-        return X[base + RICH_COLS]
-    if name == "time":
-        return X[base + TIME_EXTRA]
-    if name == "rich+time":
-        return X[base + RICH_COLS + TIME_EXTRA]
-    raise ValueError(name)
+def model_inputs(df, daily, weight_median):
+    """The inputs of the final model: distance, weight, equipment, coordinates and circuity."""
+    return build(df, daily, weight_median)[MODEL_COLS]
 
 
 def outlier_mask(df, daily, threshold=OUTLIER_LOG_THRESHOLD, seed=0):

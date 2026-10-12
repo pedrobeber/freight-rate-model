@@ -1,9 +1,7 @@
 """Paths and constants shared by all scripts."""
-import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC_DIR = ROOT / "src"
 DATA_DIR = ROOT / "data"
 RESULTS_DIR = ROOT / "scorer_results"
 PREDICTIONS_DIR = ROOT / "predictions"
@@ -15,20 +13,9 @@ DECEMBER_INPUT_FILE = DATA_DIR / "december-chart-inputs.orig.csv"
 
 VALIDATION_PREDICTIONS_FILE = PREDICTIONS_DIR / "validation_predictions.csv"
 DECEMBER_PREDICTIONS_FILE = PREDICTIONS_DIR / "december-chart-inputs.csv"
-FINAL_CONFIG_FILE = RESULTS_DIR / "svr_final_config.json"
 
-# Time split: Jan-Aug is used to fit and select, Sep-Oct is held out.
+# Time split: Jan-Aug is used to fit and compare, Sep-Oct is held out.
 TEST_START = "2025-09-01"
 
-# Rolling-origin folds on Jan-Aug: each fold trains on everything before its start date.
-ROLLING_FOLDS = [
-    ("2025-03-01", "2025-04-30"),
-    ("2025-05-01", "2025-06-30"),
-    ("2025-07-01", "2025-08-31"),
-]
-
-
-def export_src_path():
-    """Make src/ importable in joblib worker processes, which do not inherit sys.path."""
-    paths = [str(SRC_DIR), os.environ.get("PYTHONPATH", "")]
-    os.environ["PYTHONPATH"] = os.pathsep.join(path for path in paths if path)
+# RBF support vector regression. Epsilon is given in standard deviations of the target.
+SVR_SETTINGS = dict(C=45.4862082634092, gamma=0.03125996297001373, epsilon_sd=0.19872959276495822)

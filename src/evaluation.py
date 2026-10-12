@@ -11,7 +11,3 @@ def metrics(y, p):
         "RMSE": np.sqrt(np.mean(error ** 2)),
     }
 
-
-def mse_log(y, p):
-    """The loss the models are trained on: MSE of log(rate per mile)."""
-    return float(np.mean((np.log(p) - np.log(y)) ** 2))
